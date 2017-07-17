@@ -109,14 +109,13 @@ class XJWaterFallViewCell: UICollectionViewCell {
         imgView.backgroundColor = UIColor.gray
         textLabel.font = UIFont.systemFont(ofSize: 12)
         textLabel.textColor = UIColor.red
-        textLabel.backgroundColor = UIColor.purple
         self.addSubview(imgView)
         self.addSubview(textLabel)
         imgView.snp.makeConstraints { (make) in
             make.edges.equalTo(self)
         }
         textLabel.snp.makeConstraints { (make) in
-            make.right.equalTo(-10)
+            make.right.equalTo(-4)
             make.bottom.equalTo(-2)
         }
     }
