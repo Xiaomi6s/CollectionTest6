@@ -11,36 +11,53 @@ import UIKit
 let cellIdentifier = "CollectionCell"
 
 class ViewController: UIViewController {
-    var shops:[ShopInfo]?
-    var collectionView: UICollectionView {
-        loadData()
+    var shops:[ShopInfo] = [ShopInfo]()
+   lazy var collectionView: UICollectionView = {
 //        let layout = MyFlowLayout()
 //        let circleLayout = CircleLayout()
         let waterFlowLayout = XJWaterFlowLayout()
         waterFlowLayout.delegate = self
-        let collectionView = UICollectionView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: view.bounds.height - 64), collectionViewLayout: waterFlowLayout);
+        let collectionView = UICollectionView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: view.bounds.height), collectionViewLayout: waterFlowLayout);
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.dataSource = self
+        collectionView.delegate = self;
         collectionView.backgroundColor = UIColor.white
-        registerCell(ForCollectionView: collectionView)
         return collectionView
-    }
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.navigationBar.isTranslucent = false
         title = "collection"
         view.backgroundColor = UIColor.white
+        loadData()
         view.addSubview(collectionView)
+        registerCell(ForCollectionView: collectionView)
+        collectionView.addFooterRefresh {
+            self.loadData()
+            self.perform(#selector(self.refresh), with: nil, afterDelay: 2)
+        }
+        collectionView.refreshFooter?.automaticallyRefresh = true
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "next", style: .plain, target: self, action: #selector(rightAction))
+        
+    }
+    @objc func refresh() {
+        collectionView.refreshFooter?.endRefresh()
+        self.collectionView.reloadData()
+    }
+    @objc func rightAction() {
+        self.navigationController?.pushViewController(NextViewController(), animated: true)
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+     
     }
     
     func loadData() {
-        shops = [ShopInfo]()
         let path = Bundle.main.path(forResource: "shop", ofType: "plist")
         let array = NSArray(contentsOfFile: path!)
         for dic in array! {
             let shop = ShopInfo(dict: dic as! [String : Any])
-            shops?.append(shop)
+            shops.append(shop)
         }
        
     }
@@ -59,13 +76,13 @@ class ViewController: UIViewController {
 
 extension ViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return shops!.count;
+        return shops.count;
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
 //        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as? CollectionCell
 //        cell?.titleLabel.text = "\(indexPath.row)"
-        let shop = shops![indexPath.row]
+        let shop = shops[indexPath.row]
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ShopCell", for: indexPath) as? ShopCell
         let imgUrl = shop.img
         let url = URL(string: imgUrl)
@@ -76,11 +93,12 @@ extension ViewController: UICollectionViewDataSource, UICollectionViewDelegate, 
 //        collectionView.setContentOffset(CGPoint(x: indexPath.row * (150 + 20), y: 0), animated: true)
 //        print(indexPath)
     }
+    
 }
 
 extension ViewController: XJWaterFlowLayoutDelegate {
     func waterFlowLayout(_ layout: XJWaterFlowLayout, heightForItemIndex index: Int, itemWidth: CGFloat) -> CGFloat {
-        let shop = shops![index]
+        let shop = shops[index]
         return itemWidth * CGFloat(shop.height) / CGFloat(shop.width)
     }
     func columnNumberInwaterFlowLayout(_ layout: XJWaterFlowLayout) -> Int {

@@ -22,9 +22,9 @@ class XJWaterFlowLayout: UICollectionViewLayout {
     var delegate: XJWaterFlowLayoutDelegate?
     
     /// 存储最大高度
-    private var lastHeight: CGFloat = 0
+    private var lastHeight: CGFloat!
     /// 存储每列的高度
-    private var columnHeghts = [CGFloat]()
+    private var columnHeghts:[CGFloat]!
     /// 列数
     private var columnCount: Int {
         return delegate?.columnNumberInwaterFlowLayout?(self) ?? defaultColumnCount
@@ -35,6 +35,8 @@ class XJWaterFlowLayout: UICollectionViewLayout {
     }
     override func prepare() {
         super.prepare()
+        lastHeight = 0
+        columnHeghts = [CGFloat]()
         setupcolumnHeight()
         setupAttrs()
         
@@ -69,7 +71,7 @@ class XJWaterFlowLayout: UICollectionViewLayout {
                 break
             }
         }
-        return (columIndex, minHeight!)
+        return (columIndex, minHeight ?? 0)
     }
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         return attrs
